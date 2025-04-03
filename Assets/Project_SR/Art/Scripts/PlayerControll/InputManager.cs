@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace SR
 {
-    public class InputManager : MonoBehaviour
+    public class InputManager : SingletonBase<InputManager>
     {
         public string horizontalInputName = "Horizontal";
         public string verticalInputName = "Vertical";
         public string mouseXInputName = "Mouse X";
         public string mouseYInputName = "Mouse Y";
-        public string fireInputName = "Fire";
+        public string fireInputName = "Fire1";
         public string reloadInputName = "Reload";
         public string jumpInputName = "Jump";
 
