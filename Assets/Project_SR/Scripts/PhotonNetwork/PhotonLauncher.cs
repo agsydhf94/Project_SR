@@ -1,15 +1,33 @@
 using UnityEngine;
 using TMPro;
 using Photon.Pun;
+using System.Collections.Generic;
+using Photon.Realtime;
 
 namespace SR
 {
     public class PhotonLauncher : MonoBehaviourPunCallbacks
     {
+        public static PhotonLauncher Instance { get; private set; }
+
         private MenuManager menuManager;
-        [SerializeField] TMP_InputField roomNameInputField;
-        [SerializeField] TMP_Text errorText;
-        [SerializeField] TMP_Text roomNameText;
+        [SerializeField] private TMP_InputField roomNameInputField;
+        [SerializeField] private TMP_Text errorText;
+        [SerializeField] private TMP_Text roomNameText;
+        [SerializeField] private Transform roomListContent;
+        [SerializeField] private GameObject roomListItemPrefab;
+
+        private void Awake()
+        {
+            if(Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
 
         private void Start()
         {
@@ -52,6 +70,12 @@ namespace SR
             menuManager.OpenMenu("errorMenu");
         }
 
+        public void JoinRoom(RoomInfo roomInfo)
+        {
+            PhotonNetwork.JoinRoom(roomInfo.Name);
+            menuManager.OpenMenu("loading");
+        }
+
         public void LeaveRoom()
         {
             PhotonNetwork.LeaveRoom();
@@ -61,6 +85,19 @@ namespace SR
         public override void OnLeftRoom()
         {
             menuManager.OpenMenu("title");
+        }
+
+        public override void OnRoomListUpdate(List<RoomInfo> roomList)
+        {
+            foreach(Transform _transform in roomListContent)
+            {
+                Destroy(_transform.gameObject);
+            }
+
+            for(int i = 0; i < roomList.Count; i++)
+            {
+                Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().SetUp(roomList[i]);
+            }
         }
     }
 }
