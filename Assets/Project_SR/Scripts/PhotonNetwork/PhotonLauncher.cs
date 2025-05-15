@@ -3,6 +3,7 @@ using TMPro;
 using Photon.Pun;
 using System.Collections.Generic;
 using Photon.Realtime;
+using System.Linq;
 
 namespace SR
 {
@@ -16,6 +17,8 @@ namespace SR
         [SerializeField] private TMP_Text roomNameText;
         [SerializeField] private Transform roomListContent;
         [SerializeField] private GameObject roomListItemPrefab;
+        [SerializeField] private Transform playerListContent;
+        [SerializeField] private GameObject playerListItemPrefab;
 
         private void Awake()
         {
@@ -47,6 +50,7 @@ namespace SR
         {
             menuManager.OpenMenu("title");
             Debug.Log("Joined to lobby");
+            PhotonNetwork.NickName = "Player " + System.Guid.NewGuid().ToString("N").Substring(0, 4);
         }
 
         public void CreateRoom()
@@ -62,6 +66,13 @@ namespace SR
         {
             menuManager.OpenMenu("roomMenu");
             roomNameText.text = PhotonNetwork.CurrentRoom.Name;
+
+            Player[] players = PhotonNetwork.PlayerList;
+
+            for (int i = 0; i < players.Count(); i++)
+            {
+                Instantiate(playerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(players[i]);
+            }
         }
 
         public override void OnCreateRoomFailed(short returnCode, string message)
@@ -73,7 +84,7 @@ namespace SR
         public void JoinRoom(RoomInfo roomInfo)
         {
             PhotonNetwork.JoinRoom(roomInfo.Name);
-            menuManager.OpenMenu("loading");
+            menuManager.OpenMenu("loading");           
         }
 
         public void LeaveRoom()
@@ -98,6 +109,11 @@ namespace SR
             {
                 Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().SetUp(roomList[i]);
             }
+        }
+
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
+            Instantiate(playerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(newPlayer);
         }
     }
 }
